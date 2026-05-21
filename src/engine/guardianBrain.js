@@ -1,9 +1,9 @@
 import { ALERT_SIGNATURES, DAILY_ROUTE_PLAN } from './homeGraph';
 import { findPath, pathDistance, estimateEtaMeters, reroute, nextPlannedRoom } from './navigationEngine';
 import { computeRiskScore, riskLevel, predictNextHazard } from './riskEngine';
-import { updateMemory, detectFurnitureAnomaly, recordAutoAction } from './memoryEngine';
+import { updateMemory, detectFurnitureAnomaly, recordAutoAction, decayStaleHazards } from './memoryEngine';
 
-function buildReasoning({ room, alert, alertMeta, riskScore, level, memory, route, prediction }) {
+function buildReasoning({ room, alert, alertMeta, riskScore, level, memory, route, prediction, decayed }) {
   const steps = [];
 
   steps.push({
@@ -17,6 +17,14 @@ function buildReasoning({ room, alert, alertMeta, riskScore, level, memory, rout
       step: 'Recall',
       detail: `Active hazards in memory: ${memory.activeHazards.join(', ')}. ${memory.anomalyCount} layout anomalies today.`,
       confidence: 0.91,
+    });
+  }
+
+  if (decayed?.length > 0) {
+    steps.push({
+      step: 'Decay',
+      detail: `Stale hazards cleared (${decayed.join(', ')}) — environment assumed safe after 3 quiet cycles.`,
+      confidence: 0.85,
     });
   }
 
@@ -143,37 +151,43 @@ function buildRecommendations({ decision, alert, alertMeta, level, prediction })
   return recs.sort((a, b) => a.priority - b.priority);
 }
 
-function resolveRoute(currentRoom, routeIndex, memory, alertMeta) {
+function resolveRoute(currentRoom, routeIndex, memory, alertMeta, { forceOriginal = false } = {}) {
   const destination = nextPlannedRoom(currentRoom, DAILY_ROUTE_PLAN, routeIndex);
-  let planned = findPath(currentRoom, destination) || [currentRoom];
+  const originalPlanned = findPath(currentRoom, destination) || [currentRoom];
+  let planned = originalPlanned;
   let rerouted = false;
 
-  const avoidRooms = [];
-  if (memory.activeHazards.includes('wet_floor') && currentRoom === 'hallway' && destination === 'kitchen') {
-    avoidRooms.push('kitchen');
-  }
-  if (memory.activeHazards.includes('obstacle') && currentRoom === 'hallway') {
-    avoidRooms.push('hallway');
-  }
-  if (alertMeta?.hazard === 'wet_floor' && currentRoom === 'kitchen') {
-    avoidRooms.push('kitchen');
-  }
+  if (!forceOriginal) {
+    const avoidRooms = [];
+    if (memory.activeHazards.includes('wet_floor') && (destination === 'kitchen' || originalPlanned.includes('kitchen'))) {
+      const sidestep = findPath(currentRoom, 'bathroom') || findPath(currentRoom, 'bedroom');
+      if (sidestep && sidestep.join(',') !== originalPlanned.join(',')) {
+        planned = sidestep;
+        rerouted = true;
+      }
+    } else {
+      if (memory.activeHazards.includes('obstacle') && currentRoom === 'hallway') {
+        avoidRooms.push('hallway');
+      }
 
-  if (avoidRooms.length > 0) {
-    const alt = reroute(currentRoom, destination, avoidRooms);
-    if (alt && alt.length > 1) {
-      planned = alt;
-      rerouted = true;
+      if (avoidRooms.length > 0) {
+        const alt = reroute(currentRoom, destination, avoidRooms);
+        if (alt && alt.length > 1 && alt.join(',') !== originalPlanned.join(',')) {
+          planned = alt;
+          rerouted = true;
+        }
+      }
     }
   }
 
   const distance = pathDistance(planned);
   return {
     planned,
+    originalPlanned,
     destination,
     distance,
     eta: estimateEtaMeters(distance),
-    rerouted,
+    rerouted: forceOriginal ? false : rerouted,
   };
 }
 
@@ -185,10 +199,13 @@ export function processBrainTick({
   memory,
   recentAlerts = [],
   obstacles = [],
+  forceOriginalRoute = false,
+  skipCaregiverPrompt = false,
 }) {
   const alertMeta = ALERT_SIGNATURES[alert.msg] || { hazard: 'none', category: 'unknown', severity: 0.1 };
 
-  let nextMemory = updateMemory(memory, { room, alertMeta, alertType: alert.type });
+  const { memory: decayedMemory, decayed } = decayStaleHazards(memory, alertMeta);
+  let nextMemory = updateMemory(decayedMemory, { room, alertMeta, alertType: alert.type });
   const anomalies = detectFurnitureAnomaly(room, obstacles);
   if (anomalies.length > 0) {
     nextMemory = { ...nextMemory, anomalyCount: nextMemory.anomalyCount + anomalies.length };
@@ -196,10 +213,10 @@ export function processBrainTick({
 
   const riskScore = computeRiskScore({ room, alertMeta, memory: nextMemory, recentAlerts });
   const level = riskLevel(riskScore);
-  const route = resolveRoute(room, routeIndex, nextMemory, alertMeta);
+  const route = resolveRoute(room, routeIndex, nextMemory, alertMeta, { forceOriginal: forceOriginalRoute });
   const prediction = predictNextHazard(room, nextMemory);
   const decision = buildDecision({ alert, alertMeta, level, route, room });
-  const reasoning = buildReasoning({ room, alert, alertMeta, riskScore, level, memory: nextMemory, route, prediction });
+  const reasoning = buildReasoning({ room, alert, alertMeta, riskScore, level, memory: nextMemory, route, prediction, decayed });
   const recommendations = buildRecommendations({ decision, alert, alertMeta, level, prediction });
 
   if (decision.autonomous && decision.action !== 'MONITOR') {
@@ -212,6 +229,12 @@ export function processBrainTick({
 
   nextMemory = { ...nextMemory, lastDecision: decision };
 
+  const needsCaregiverApproval =
+    !skipCaregiverPrompt &&
+    !forceOriginalRoute &&
+    decision.action === 'REROUTE' &&
+    route.rerouted;
+
   return {
     riskScore,
     riskLevel: level,
@@ -223,6 +246,8 @@ export function processBrainTick({
     anomalies,
     memory: nextMemory,
     alertMeta,
+    decayed,
+    needsCaregiverApproval,
   };
 }
 
@@ -248,10 +273,12 @@ function createInitialMemory() {
   return {
     activeHazards: [],
     resolvedHazards: [],
+    hazardFreshness: {},
     anomalyCount: 0,
     furnitureDrift: {},
     roomVisits: {},
     autoActions: [],
+    caregiverActions: [],
     lastDecision: null,
   };
 }

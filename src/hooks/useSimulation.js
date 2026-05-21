@@ -9,7 +9,10 @@ import {
   CHART_HOURS,
   LIDAR_OBSTACLES,
 } from '../data/constants';
+import { CHAOS_PRESETS } from '../data/chaosPresets';
 import { processBrainTick, getInitialBrainState } from '../engine/guardianBrain';
+import { recordCaregiverAction } from '../engine/memoryEngine';
+import { buildSereneAlert } from '../utils/sereneMessages';
 
 function getCurrentHourIndex() {
   const hour = new Date().getHours();
@@ -45,25 +48,42 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
   const [pathTrail, setPathTrail] = useState([]);
   const [chartData, setChartData] = useState(INITIAL_CHART);
   const [stats, setStats] = useState({ safeTrips: 7, alerts: 2, independentSec: 15120, autoActions: 0, reroutes: 0 });
-  const [toast, setToast] = useState(null);
+  const [sereneAlert, setSereneAlert] = useState(null);
   const [brain, setBrain] = useState(getInitialBrainState);
+  const [pendingOverride, setPendingOverride] = useState(null);
+
   const memoryRef = useRef(getInitialBrainState().memory);
+  const routeIndexRef = useRef(0);
   const tickRef = useRef(0);
 
   const currentStatus = ROUTE[routeIndex];
   const activeRoomId = currentStatus.room;
 
-  const advance = useCallback(() => {
-    setRouteIndex((prev) => {
-      const next = (prev + 1) % ROUTE.length;
-      const cycleAlert = ALERTS_CYCLE[next % ALERTS_CYCLE.length];
-      const room = ROUTE[next].room;
+  const applyEvent = useCallback(
+    (rawAlert, { advanceRoute = false, forceOriginalRoute = false, skipCaregiverPrompt = false, injected = false } = {}) => {
+      const idx = routeIndexRef.current;
+      const nextIdx = advanceRoute ? (idx + 1) % ROUTE.length : idx;
+      const room = ROUTE[nextIdx].room;
       const dot = ROOM_LAYOUT[room];
 
+      const alert = {
+        id: `${Date.now()}-${Math.random()}`,
+        time: 'just now',
+        type: rawAlert.type,
+        msg: rawAlert.msg,
+        injected,
+      };
+
+      if (advanceRoute) {
+        routeIndexRef.current = nextIdx;
+        setRouteIndex(nextIdx);
+        setPathTrail((trail) => [...trail, { x: dot.dotX, y: dot.dotY, room }].slice(-20));
+        setChartData((c) => bumpChartRoom(c, room));
+      }
+
       setAlerts((current) => {
-        const newAlert = { id: `${Date.now()}-${Math.random()}`, time: 'just now', ...cycleAlert };
         const updated = [
-          newAlert,
+          alert,
           ...current.slice(0, 5).map((a) => ({
             ...a,
             time: a.time === 'just now' ? '12s ago' : a.time,
@@ -72,12 +92,15 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
 
         const brainResult = processBrainTick({
           room,
-          alert: cycleAlert,
-          routeIndex: next,
+          alert,
+          routeIndex: nextIdx,
           memory: memoryRef.current,
           recentAlerts: updated,
           obstacles: LIDAR_OBSTACLES,
+          forceOriginalRoute,
+          skipCaregiverPrompt,
         });
+
         memoryRef.current = brainResult.memory;
 
         setBrain({
@@ -90,33 +113,118 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
           prediction: brainResult.prediction,
           anomalies: brainResult.anomalies,
           memory: brainResult.memory,
+          decayed: brainResult.decayed,
         });
 
         setStats((s) => ({
           ...s,
-          independentSec: s.independentSec + Math.floor(intervalMs / 1000),
-          safeTrips: cycleAlert.type === 'safe' ? s.safeTrips + 1 : s.safeTrips,
-          alerts: cycleAlert.type === 'warn' || cycleAlert.type === 'danger' ? s.alerts + 1 : s.alerts,
-          autoActions: brainResult.decision.autonomous && brainResult.decision.action !== 'MONITOR'
-            ? s.autoActions + 1
-            : s.autoActions,
+          independentSec: advanceRoute ? s.independentSec + Math.floor(intervalMs / 1000) : s.independentSec,
+          safeTrips: alert.type === 'safe' ? s.safeTrips + 1 : s.safeTrips,
+          alerts: alert.type === 'warn' || alert.type === 'danger' ? s.alerts + 1 : s.alerts,
+          autoActions:
+            brainResult.decision.autonomous && brainResult.decision.action !== 'MONITOR'
+              ? s.autoActions + 1
+              : s.autoActions,
           reroutes: brainResult.route.rerouted ? s.reroutes + 1 : s.reroutes,
         }));
 
-        if (cycleAlert.type === 'warn' || cycleAlert.type === 'danger') {
-          setToast({ type: cycleAlert.type, msg: cycleAlert.msg, decision: brainResult.decision.label });
+        setSereneAlert(
+          buildSereneAlert({
+            alert,
+            room,
+            decision: brainResult.decision.label,
+            riskLevel: brainResult.riskLevel,
+          }),
+        );
+
+        if (brainResult.needsCaregiverApproval) {
+          setPendingOverride({
+            originalRoute: brainResult.route.originalPlanned,
+            proposedRoute: brainResult.route.planned,
+            reason: brainResult.decision.reason,
+            alertMsg: alert.msg,
+          });
         }
 
         return updated;
       });
 
-      setPathTrail((trail) => [...trail, { x: dot.dotX, y: dot.dotY, room }].slice(-20));
-      setChartData((c) => bumpChartRoom(c, room));
+      if (advanceRoute) tickRef.current += 1;
+    },
+    [intervalMs],
+  );
 
-      return next;
+  const advance = useCallback(() => {
+    const next = (routeIndexRef.current + 1) % ROUTE.length;
+    const cycleAlert = ALERTS_CYCLE[next % ALERTS_CYCLE.length];
+    applyEvent(cycleAlert, { advanceRoute: true });
+  }, [applyEvent]);
+
+  const injectHazard = useCallback(
+    (presetId) => {
+      const preset = CHAOS_PRESETS[presetId];
+      if (!preset) return;
+
+      // Snap to hallway so wet-floor reroute demo triggers reliably for judges
+      if (presetId === 'wet_floor') {
+        routeIndexRef.current = 1;
+        setRouteIndex(1);
+      }
+
+      applyEvent({ type: preset.type, msg: preset.msg }, { injected: true });
+    },
+    [applyEvent],
+  );
+
+  const approveReroute = useCallback(() => {
+    if (!pendingOverride) return;
+    memoryRef.current = recordCaregiverAction(memoryRef.current, {
+      action: 'APPROVE_REROUTE',
+      label: 'Approved reroute',
     });
-    tickRef.current += 1;
-  }, [intervalMs]);
+    setBrain((prev) => ({ ...prev, memory: memoryRef.current }));
+    setPendingOverride(null);
+    setSereneAlert(
+      buildSereneAlert({
+        alert: { type: 'info', msg: 'Caregiver approved HoloAid reroute' },
+        room: activeRoomId,
+        decision: 'Reroute approved',
+        riskLevel: brain.riskLevel,
+      }),
+    );
+  }, [pendingOverride, activeRoomId, brain.riskLevel]);
+
+  const rejectReroute = useCallback(() => {
+    if (!pendingOverride) return;
+    memoryRef.current = recordCaregiverAction(memoryRef.current, {
+      action: 'REJECT_REROUTE',
+      label: 'Kept original path',
+    });
+    setBrain((prev) => ({
+      ...prev,
+      route: {
+        ...prev.route,
+        planned: pendingOverride.originalRoute,
+        rerouted: false,
+      },
+      memory: memoryRef.current,
+      decision: {
+        ...prev.decision,
+        label: 'Original path restored',
+        reason: 'Caregiver overrode brain reroute — keeping direct route',
+        action: 'MONITOR',
+      },
+    }));
+    setPendingOverride(null);
+    setSereneAlert(
+      buildSereneAlert({
+        alert: { type: 'info', msg: 'Caregiver kept original path' },
+        room: activeRoomId,
+        decision: 'Override applied',
+        riskLevel: brain.riskLevel,
+      }),
+    );
+  }, [pendingOverride, activeRoomId, brain.riskLevel]);
 
   useEffect(() => {
     if (paused) return undefined;
@@ -126,6 +234,7 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
 
   const scrubTo = useCallback((index) => {
     const clamped = Math.max(0, Math.min(ROUTE.length - 1, index));
+    routeIndexRef.current = clamped;
     setRouteIndex(clamped);
     setPathTrail(
       ROUTE.slice(0, clamped + 1).map((r) => {
@@ -135,7 +244,7 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
     );
   }, []);
 
-  const dismissToast = useCallback(() => setToast(null), []);
+  const dismissSereneAlert = useCallback(() => setSereneAlert(null), []);
 
   return {
     routeIndex,
@@ -154,8 +263,12 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
       autoActions: stats.autoActions,
       reroutes: stats.reroutes,
     },
-    toast,
-    dismissToast,
+    sereneAlert,
+    dismissSereneAlert,
+    pendingOverride,
+    approveReroute,
+    rejectReroute,
+    injectHazard,
     scrubTo,
     advance,
     tick: tickRef.current,

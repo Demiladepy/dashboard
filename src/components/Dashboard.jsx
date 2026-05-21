@@ -8,9 +8,12 @@ import ActivityChart from './ActivityChart';
 import ImpactBanner from './ImpactBanner';
 import TimelineScrubber from './TimelineScrubber';
 import ActionBar from './ActionBar';
-import ToastNotification from './ToastNotification';
+import SereneAlert from './SereneAlert';
+import { primeAudio } from '../utils/sereneChime';
 import GuardianBrainPanel from './GuardianBrainPanel';
 import RoutePlanner from './RoutePlanner';
+import ChaosInjector from './ChaosInjector';
+import CaregiverOverride from './CaregiverOverride';
 import AutonomousLog from './AutonomousLog';
 import SosModal from './modals/SosModal';
 import IntercomModal from './modals/IntercomModal';
@@ -21,6 +24,7 @@ export default function Dashboard({ onBack }) {
   const [sosOpen, setSosOpen] = useState(false);
   const [intercomOpen, setIntercomOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const sim = useSimulation({ paused });
 
@@ -39,6 +43,17 @@ export default function Dashboard({ onBack }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                primeAudio();
+                setSoundEnabled((s) => !s);
+              }}
+              className="text-[10px] text-muted hover:text-text px-2 py-1 rounded-full border border-border transition-colors"
+              aria-label={soundEnabled ? 'Mute serene alerts' : 'Enable serene alerts'}
+            >
+              {soundEnabled ? 'Sound on' : 'Muted'}
+            </button>
             {onBack && (
               <button type="button" onClick={onBack} className="hidden lg:block text-[11px] text-muted hover:text-text transition-colors">
                 ← Back
@@ -57,6 +72,11 @@ export default function Dashboard({ onBack }) {
 
         <div className="mt-5">
           <GuardianBrainPanel brain={sim.brain} />
+          <CaregiverOverride
+            pending={sim.pendingOverride}
+            onApprove={sim.approveReroute}
+            onReject={sim.rejectReroute}
+          />
         </div>
 
         <div className="mt-5 lg:mt-6 grid lg:grid-cols-12 gap-5 lg:gap-6">
@@ -82,6 +102,7 @@ export default function Dashboard({ onBack }) {
           </div>
 
           <div className="lg:col-span-3 space-y-5">
+            <ChaosInjector onInject={sim.injectHazard} disabled={!!sim.pendingOverride} />
             <RoutePlanner brain={sim.brain} activeRoomId={sim.activeRoomId} />
             <AutonomousLog memory={sim.brain.memory} />
           </div>
@@ -104,7 +125,11 @@ export default function Dashboard({ onBack }) {
         </div>
       </div>
 
-      <ToastNotification toast={sim.toast} onDismiss={sim.dismissToast} />
+      <SereneAlert
+        alert={sim.sereneAlert}
+        onDismiss={sim.dismissSereneAlert}
+        soundEnabled={soundEnabled}
+      />
       <SosModal open={sosOpen} onClose={() => setSosOpen(false)} />
       <IntercomModal open={intercomOpen} onClose={() => setIntercomOpen(false)} />
       <ReportsModal open={reportsOpen} onClose={() => setReportsOpen(false)} stats={sim.stats} alerts={sim.alerts} brain={sim.brain} />

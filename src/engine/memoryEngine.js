@@ -4,10 +4,12 @@ export function createMemory() {
   return {
     activeHazards: [],
     resolvedHazards: [],
+    hazardFreshness: {},
     anomalyCount: 0,
     furnitureDrift: {},
     roomVisits: {},
     autoActions: [],
+    caregiverActions: [],
     lastDecision: null,
   };
 }
@@ -18,9 +20,11 @@ export function updateMemory(memory, { room, alertMeta, alertType }) {
     roomVisits: { ...memory.roomVisits, [room]: (memory.roomVisits[room] || 0) + 1 },
     activeHazards: [...memory.activeHazards],
     resolvedHazards: [...memory.resolvedHazards],
+    hazardFreshness: { ...(memory.hazardFreshness || {}) },
     furnitureDrift: { ...memory.furnitureDrift },
     anomalyCount: memory.anomalyCount,
     autoActions: [...memory.autoActions],
+    caregiverActions: [...(memory.caregiverActions || [])],
   };
 
   if (!alertMeta) return next;
@@ -30,9 +34,11 @@ export function updateMemory(memory, { room, alertMeta, alertType }) {
     if (alertMeta.resolved) {
       next.activeHazards = next.activeHazards.filter((h) => h !== hazard);
       if (!next.resolvedHazards.includes(hazard)) next.resolvedHazards.push(hazard);
+      delete next.hazardFreshness[hazard];
     } else if (!next.activeHazards.includes(hazard)) {
       next.activeHazards.push(hazard);
     }
+    next.hazardFreshness[hazard] = 0;
   }
 
   if (hazard === 'furniture_shift') {
@@ -41,7 +47,8 @@ export function updateMemory(memory, { room, alertMeta, alertType }) {
   }
 
   if (alertType === 'danger') {
-    next.activeHazards.push('fall');
+    if (!next.activeHazards.includes('fall')) next.activeHazards.push('fall');
+    next.hazardFreshness.fall = 0;
   }
 
   return next;
@@ -72,5 +79,43 @@ export function recordAutoAction(memory, action) {
   return {
     ...memory,
     autoActions: [entry, ...memory.autoActions].slice(0, 8),
+  };
+}
+
+/** Hazards fade after 3 cycles without refresh — environments are dynamic */
+export function decayStaleHazards(memory, currentAlertMeta) {
+  const refreshed =
+    currentAlertMeta?.hazard && currentAlertMeta.hazard !== 'none' ? currentAlertMeta.hazard : null;
+
+  const hazardFreshness = { ...memory.hazardFreshness };
+  let activeHazards = [...memory.activeHazards];
+  const decayed = [];
+
+  for (const hazard of [...activeHazards]) {
+    if (hazard === refreshed) {
+      hazardFreshness[hazard] = 0;
+      continue;
+    }
+
+    const stale = (hazardFreshness[hazard] ?? 0) + 1;
+    hazardFreshness[hazard] = stale;
+
+    if (stale >= 3) {
+      activeHazards = activeHazards.filter((h) => h !== hazard);
+      delete hazardFreshness[hazard];
+      decayed.push(hazard);
+    }
+  }
+
+  return {
+    memory: { ...memory, activeHazards, hazardFreshness },
+    decayed,
+  };
+}
+
+export function recordCaregiverAction(memory, action) {
+  return {
+    ...memory,
+    caregiverActions: [{ ...action, timestamp: Date.now() }, ...memory.caregiverActions].slice(0, 6),
   };
 }
