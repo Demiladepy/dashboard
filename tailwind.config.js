@@ -1,41 +1,52 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'sans-serif'],
-        mono: ['DM Mono', 'monospace'],
+        sans: ['Varela Round', 'sans-serif'],
       },
       colors: {
-        background: '#0B0F14',
-        card: '#111720',
-        border: '#1E2530',
+        background: '#060d18',
+        surface: '#0c1526',
+        card: '#111d32',
+        border: 'rgba(255,255,255,0.08)',
+        text: '#f6f9fc',
+        'text-secondary': '#8898aa',
+        muted: '#556677',
+        accent: {
+          DEFAULT: '#635bff',
+          cyan: '#00d4ff',
+          glow: 'rgba(99, 91, 255, 0.15)',
+        },
+        'accent-cyan': '#00d4ff',
+        'accent-amber': '#f5a623',
+        'accent-red': '#ff4757',
         green: {
-          DEFAULT: '#34D399',
-          12: 'rgba(52, 211, 153, 0.12)',
+          DEFAULT: '#00d4ff',
+          12: 'rgba(0, 212, 255, 0.12)',
         },
         amber: {
-          DEFAULT: '#FBBF24',
-          12: 'rgba(251, 191, 36, 0.12)',
+          DEFAULT: '#f5a623',
+          12: 'rgba(245, 166, 35, 0.12)',
         },
         blue: {
-          DEFAULT: '#60A5FA',
-          12: 'rgba(96, 165, 250, 0.12)',
+          DEFAULT: '#635bff',
+          12: 'rgba(99, 91, 255, 0.12)',
         },
         red: {
-          DEFAULT: '#EF4444',
-          12: 'rgba(239, 68, 68, 0.12)',
+          DEFAULT: '#ff4757',
+          12: 'rgba(255, 71, 87, 0.12)',
         },
         purple: {
-          DEFAULT: '#A78BFA',
+          DEFAULT: '#7a73ff',
         },
-        dim: '#64748B',
-      }
+        dim: '#556677',
+      },
     },
   },
   plugins: [],
-}
+};
