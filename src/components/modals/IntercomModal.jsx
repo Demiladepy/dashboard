@@ -22,8 +22,8 @@ export default function IntercomModal({ open, onClose }) {
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="intercom-title">
       <div className="modal-panel">
         <div className="flex items-center justify-between">
-          <h2 id="intercom-title" className="text-lg font-semibold text-slate-100">Intercom</h2>
-          <button type="button" onClick={onClose} className="text-dim hover:text-slate-300 p-1" aria-label="Close intercom">
+          <h2 id="intercom-title" className="text-lg font-semibold text-text">Intercom</h2>
+          <button type="button" onClick={onClose} className="text-muted hover:text-text p-1" aria-label="Close intercom">
             <Icons.close />
           </button>
         </div>
@@ -33,20 +33,20 @@ export default function IntercomModal({ open, onClose }) {
           {bars.map((h, i) => (
             <div
               key={i}
-              className="w-2 rounded-full bg-green transition-all duration-75"
+              className="w-2 rounded-full bg-accent transition-all duration-75"
               style={{ height: `${h}%`, opacity: talking ? 0.4 + (h / 100) * 0.6 : 0.2 }}
             />
           ))}
         </div>
 
-        <p className="text-center text-[11px] font-mono text-dim mt-4">
+        <p className="text-center text-[11px] text-muted mt-4">
           {talking ? 'Transmitting…' : 'Hold to speak'}
         </p>
 
         <button
           type="button"
           className={`mt-6 mx-auto flex items-center justify-center gap-2 w-full max-w-[200px] py-3 rounded-xl font-semibold text-sm transition-all ${
-            talking ? 'bg-green text-background scale-105' : 'bg-green-12 text-green border border-green/20'
+            talking ? 'bg-accent text-white scale-105' : 'bg-blue-12 text-accent border border-blue/15'
           }`}
           onMouseDown={() => setTalking(true)}
           onMouseUp={() => setTalking(false)}

@@ -30,10 +30,10 @@ export default function Dashboard({ onBack }) {
 
   return (
     <div className="dashboard-root min-h-screen flex flex-col">
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
+      <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-xl border-b border-border shadow-stripe-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-5 lg:px-8 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-accent-cyan header-pulse" aria-hidden="true" />
+            <div className="w-2.5 h-2.5 rounded-full bg-accent header-pulse" aria-hidden="true" />
             <div>
               <h1 className="text-[15px] font-normal text-text leading-tight">HoloAid</h1>
               <p className="text-[11px] text-muted mt-0.5">Monitoring care giver system</p>
@@ -59,9 +59,9 @@ export default function Dashboard({ onBack }) {
                 ← Back
               </button>
             )}
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan header-pulse" />
-              <span className="text-[10px] text-accent-cyan uppercase tracking-wider">Live</span>
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-12 border border-blue/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent header-pulse" />
+              <span className="text-[10px] text-accent uppercase tracking-wider">Live</span>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function Dashboard({ onBack }) {
         </div>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 lg:static z-20 px-5 lg:px-8 pb-5 lg:pb-8 pt-3 bg-gradient-to-t from-background via-background/95 to-transparent lg:from-transparent">
+      <div className="fixed bottom-0 left-0 right-0 lg:static z-20 px-5 lg:px-8 pb-5 lg:pb-8 pt-3 bg-gradient-to-t from-background via-background/95 to-transparent lg:from-transparent lg:via-transparent lg:bg-transparent">
         <div className="max-w-7xl mx-auto">
           <ActionBar
             onIntercom={() => setIntercomOpen(true)}

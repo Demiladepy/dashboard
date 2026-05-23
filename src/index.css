@@ -9,8 +9,9 @@
     @apply bg-background m-0 p-0 text-text-secondary font-sans antialiased;
     overflow-x: hidden;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 91, 255, 0.15), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0, 212, 255, 0.06), transparent);
+      radial-gradient(ellipse 90% 60% at 8% -10%, rgba(99, 91, 255, 0.09), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 92% 0%, rgba(0, 212, 238, 0.07), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(99, 91, 255, 0.05), transparent 55%);
     background-attachment: fixed;
   }
 
@@ -29,60 +30,60 @@
   }
 
   .stripe-card {
-    @apply bg-card border border-border rounded-2xl p-5;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    @apply bg-card border border-border rounded-2xl p-5 shadow-stripe;
   }
 
   .stripe-btn {
     @apply px-6 py-3 rounded-full font-normal text-sm text-white transition-all;
-    background: linear-gradient(135deg, #635bff 0%, #7a73ff 50%, #00d4ff 100%);
-    box-shadow: 0 4px 14px rgba(99, 91, 255, 0.35);
+    background: #635bff;
+    box-shadow: 0 4px 14px rgba(99, 91, 255, 0.28);
   }
 
   .stripe-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(99, 91, 255, 0.45);
+    background: #5851ea;
+    box-shadow: 0 6px 20px rgba(99, 91, 255, 0.35);
   }
 
   .stripe-gradient-text {
-    background: linear-gradient(135deg, #635bff 0%, #00d4ff 100%);
+    background: linear-gradient(135deg, #635bff 0%, #00a2c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .badge-cyan {
-    @apply bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20;
+    @apply bg-green-12 text-accent-cyan border border-green-12;
   }
 
   .badge-muted {
-    @apply bg-white/5 text-muted border border-border;
+    @apply bg-background text-muted border border-border;
   }
 
   .badge-amber {
-    @apply bg-accent-amber/10 text-accent-amber border border-accent-amber/20;
+    @apply bg-amber-12 text-accent-amber border border-amber-12;
   }
 
   .badge-red {
-    @apply bg-accent-red/10 text-accent-red border border-accent-red/20;
+    @apply bg-red-12 text-accent-red border border-red-12;
   }
 
   .landing-grid {
     background-image:
-      linear-gradient(rgba(99, 91, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99, 91, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(rgba(99, 91, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 91, 255, 0.05) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
   }
 
   .landing-glow {
-    background: radial-gradient(ellipse, rgba(99, 91, 255, 0.18) 0%, transparent 65%);
+    background: radial-gradient(ellipse, rgba(99, 91, 255, 0.1) 0%, transparent 65%);
   }
 
   .lidar-grid {
     background-image:
-      linear-gradient(rgba(0, 212, 255, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 212, 255, 0.06) 1px, transparent 1px);
+      linear-gradient(rgba(99, 91, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 91, 255, 0.06) 1px, transparent 1px);
     background-size: 16px 16px;
   }
 
@@ -91,7 +92,7 @@
   }
 
   .brain-scroll::-webkit-scrollbar-thumb {
-    background: rgba(99, 91, 255, 0.3);
+    background: rgba(99, 91, 255, 0.25);
     border-radius: 4px;
   }
 
@@ -101,56 +102,35 @@
 
   .modal-overlay {
     @apply fixed inset-0 z-50 flex items-center justify-center p-5;
-    background: rgba(6, 13, 24, 0.9);
-    backdrop-filter: blur(12px);
+    background: rgba(246, 249, 252, 0.85);
+    backdrop-filter: blur(8px);
     animation: fade-in 0.2s ease-out;
   }
 
   .modal-panel {
-    @apply bg-card border border-border rounded-2xl p-6 w-full max-w-sm;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    @apply bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-stripe;
     animation: scale-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .sos-hold-btn {
-    @apply w-[120px] h-[120px] mx-auto rounded-full bg-red-12 border-2 border-red/30 flex items-center justify-center cursor-pointer select-none;
+    @apply w-[120px] h-[120px] mx-auto rounded-full bg-red-12 border-2 border-red/20 flex items-center justify-center cursor-pointer select-none;
   }
 
   .sos-active {
-    box-shadow: 0 0 60px rgba(255, 71, 87, 0.2);
-  }
-
-  .toast-container {
-    @apply fixed top-5 right-5 z-40 max-w-sm w-full px-4;
-  }
-
-  .toast-item {
-    @apply flex items-center gap-3 bg-card border border-border rounded-xl p-3;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    animation: slide-in-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .toast-warn {
-    @apply border-accent-amber/30;
-  }
-
-  .toast-danger {
-    @apply border-accent-red/40 bg-accent-red/5;
+    box-shadow: 0 0 40px rgba(223, 27, 65, 0.15);
   }
 
   .timeline-slider {
-    @apply appearance-none h-1 rounded-full bg-surface cursor-pointer;
+    @apply appearance-none h-1.5 rounded-full bg-border cursor-pointer;
   }
 
   .timeline-slider::-webkit-slider-thumb {
-    @apply appearance-none w-3.5 h-3.5 rounded-full cursor-pointer;
-    background: linear-gradient(135deg, #635bff, #00d4ff);
-    box-shadow: 0 0 10px rgba(99, 91, 255, 0.5);
+    @apply appearance-none w-3.5 h-3.5 rounded-full cursor-pointer bg-accent;
+    box-shadow: 0 2px 6px rgba(99, 91, 255, 0.35);
   }
 
   .timeline-slider::-moz-range-thumb {
-    @apply w-3.5 h-3.5 rounded-full border-0 cursor-pointer;
-    background: linear-gradient(135deg, #635bff, #00d4ff);
+    @apply w-3.5 h-3.5 rounded-full border-0 cursor-pointer bg-accent;
   }
 
   .stat-card {
@@ -159,14 +139,14 @@
 
   .stat-card:hover {
     border-color: rgba(99, 91, 255, 0.25);
-    box-shadow: inset 0 0 24px rgba(99, 91, 255, 0.04);
+    box-shadow: 0 4px 12px rgba(99, 91, 255, 0.08);
   }
 }
 
 @keyframes header-dot-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(0, 212, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(99, 91, 255, 0.35); }
+  70% { box-shadow: 0 0 0 6px rgba(99, 91, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 91, 255, 0); }
 }
 .header-pulse { animation: header-dot-pulse 2s infinite; }
 
@@ -200,7 +180,7 @@
 
 .path-planned {
   stroke-dasharray: 6 4;
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 @keyframes fade-up {
@@ -228,14 +208,9 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
 @keyframes sos-pulse-keyframes {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
-  50% { box-shadow: 0 0 0 12px rgba(255, 71, 87, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(223, 27, 65, 0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(223, 27, 65, 0); }
 }
 .sos-pulse { animation: sos-pulse-keyframes 1.5s infinite; }
 
@@ -245,13 +220,12 @@
 
 .override-flash {
   @apply mt-4 rounded-2xl p-[1px];
-  background: linear-gradient(135deg, rgba(245, 166, 35, 0.4), rgba(99, 91, 255, 0.3));
+  background: linear-gradient(135deg, rgba(223, 134, 0, 0.35), rgba(99, 91, 255, 0.25));
   animation: serene-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .override-flash-inner {
-  @apply rounded-2xl bg-card p-4;
-  box-shadow: 0 8px 32px rgba(245, 166, 35, 0.08);
+  @apply rounded-2xl bg-card p-4 shadow-stripe-sm;
 }
 
 .serene-alert-wrap {
@@ -259,38 +233,33 @@
 }
 
 .serene-alert {
-  @apply relative rounded-2xl p-5 overflow-hidden pointer-events-auto;
-  backdrop-filter: blur(20px);
+  @apply relative rounded-2xl p-5 overflow-hidden pointer-events-auto bg-card border border-border shadow-stripe;
   animation: serene-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .serene-alert-glow {
-  @apply absolute inset-0 opacity-40;
-  background: radial-gradient(ellipse at top, rgba(99, 91, 255, 0.2), transparent 70%);
+  @apply absolute inset-0 opacity-60;
+  background: radial-gradient(ellipse at top, rgba(99, 91, 255, 0.06), transparent 70%);
 }
 
 .serene-info {
-  @apply bg-card/90 border border-accent-cyan/20;
+  @apply border-accent/15;
 }
 
 .serene-safe {
-  @apply bg-card/90 border border-accent-cyan/30;
-  box-shadow: 0 8px 40px rgba(0, 212, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  @apply border-green-12;
 }
 
 .serene-warn {
-  @apply bg-card/90 border border-accent-amber/25;
-  box-shadow: 0 8px 40px rgba(245, 166, 35, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  @apply border-amber-12;
 }
 
 .serene-danger {
-  @apply bg-card/95 border border-accent-red/30;
-  box-shadow: 0 8px 48px rgba(255, 71, 87, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  @apply border-red-12 bg-red-12/30;
 }
 
 .serene-alert-headline {
-  @apply text-[11px] uppercase tracking-[0.12em] text-accent-cyan;
+  @apply text-[11px] uppercase tracking-[0.12em] text-accent;
 }
 
 .serene-danger .serene-alert-headline {
@@ -302,7 +271,7 @@
 }
 
 .serene-alert-room {
-  @apply text-[10px] text-muted px-2 py-0.5 rounded-full bg-surface border border-border;
+  @apply text-[10px] text-muted px-2 py-0.5 rounded-full bg-background border border-border;
 }
 
 .serene-alert-message {

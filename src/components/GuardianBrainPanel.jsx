@@ -1,5 +1,5 @@
 const LEVEL_STYLES = {
-  low: { bar: 'bg-accent-cyan', text: 'text-accent-cyan', badge: 'badge-cyan' },
+  low: { bar: 'bg-accent', text: 'text-accent', badge: 'badge-cyan' },
   moderate: { bar: 'bg-muted', text: 'text-muted', badge: 'badge-muted' },
   high: { bar: 'bg-accent-amber', text: 'text-accent-amber', badge: 'badge-amber' },
   critical: { bar: 'bg-accent-red', text: 'text-accent-red', badge: 'badge-red' },
@@ -21,7 +21,7 @@ export default function GuardianBrainPanel({ brain }) {
         </div>
       </div>
 
-      <div className="h-1.5 rounded-full bg-surface overflow-hidden mb-5">
+      <div className="h-1.5 rounded-full bg-background overflow-hidden mb-5">
         <div
           className={`h-full rounded-full transition-all duration-700 ${styles.bar}`}
           style={{ width: `${brain.riskScore}%` }}
@@ -42,7 +42,7 @@ export default function GuardianBrainPanel({ brain }) {
         ))}
       </div>
 
-      <div className="rounded-xl bg-surface border border-border p-3 mb-4">
+      <div className="rounded-xl bg-background border border-border p-3 mb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${styles.badge}`}>
             {brain.decision.priority}
@@ -56,7 +56,7 @@ export default function GuardianBrainPanel({ brain }) {
       </div>
 
       {brain.prediction && (
-        <div className="rounded-xl bg-accent/5 border border-accent/20 p-3 mb-4">
+        <div className="rounded-xl bg-blue-12 border border-blue/15 p-3 mb-4">
           <p className="text-[10px] uppercase tracking-wider text-accent mb-1">Predictive alert</p>
           <p className="text-[13px] text-text">
             {Math.round(brain.prediction.probability * 100)}% {brain.prediction.type} risk within {brain.prediction.window}

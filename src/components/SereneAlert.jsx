@@ -36,12 +36,12 @@ export default function SereneAlert({ alert, onDismiss, soundEnabled = true }) {
           <p className="serene-alert-message">{alert.message}</p>
           <p className="serene-alert-reassurance">{alert.reassurance}</p>
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
             <span className="text-[10px] text-muted capitalize">{alert.riskLevel} risk · HoloAid brain</span>
             <button
               type="button"
               onClick={onDismiss}
-              className="text-[11px] text-accent-cyan hover:text-text transition-colors"
+              className="text-[11px] text-accent hover:opacity-80 transition-opacity"
             >
               Acknowledge
             </button>

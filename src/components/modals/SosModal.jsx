@@ -58,8 +58,8 @@ export default function SosModal({ open, onClose }) {
       <div className={`modal-panel sos-panel ${phase === 'active' || phase === 'done' ? 'sos-active' : ''}`}>
         {phase === 'idle' && (
           <>
-            <h2 id="sos-title" className="text-lg font-semibold text-slate-100">Emergency SOS</h2>
-            <p className="text-sm text-slate-400 mt-2">Hold the button below for 1.5 seconds to alert all emergency contacts.</p>
+            <h2 id="sos-title" className="text-lg font-semibold text-text">Emergency SOS</h2>
+            <p className="text-sm text-text-secondary mt-2">Hold the button below for 1.5 seconds to alert all emergency contacts.</p>
             <button
               type="button"
               className="sos-hold-btn mt-8 relative"
@@ -71,21 +71,21 @@ export default function SosModal({ open, onClose }) {
               aria-label="Hold to activate SOS"
             >
               <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
-                <circle cx="60" cy="60" r="54" fill="none" stroke="#1E2530" strokeWidth="4" />
+                <circle cx="60" cy="60" r="54" fill="none" stroke="#e3e8ee" strokeWidth="4" />
                 <circle
                   cx="60"
                   cy="60"
                   r="54"
                   fill="none"
-                  stroke="#EF4444"
+                  stroke="#df1b41"
                   strokeWidth="4"
                   strokeDasharray={`${(progress / 100) * 339} 339`}
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="relative z-10 text-red font-bold text-sm">HOLD</span>
+              <span className="relative z-10 text-accent-red font-bold text-sm">HOLD</span>
             </button>
-            <button type="button" onClick={handleClose} className="mt-6 text-sm text-dim hover:text-slate-300 transition-colors">
+            <button type="button" onClick={handleClose} className="mt-6 text-sm text-muted hover:text-text transition-colors">
               Cancel
             </button>
           </>
@@ -93,19 +93,19 @@ export default function SosModal({ open, onClose }) {
 
         {(phase === 'active' || phase === 'done') && (
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto rounded-full bg-red-12 border-2 border-red flex items-center justify-center sos-pulse">
-              <span className="text-red text-2xl font-bold">!</span>
+            <div className="w-16 h-16 mx-auto rounded-full bg-red-12 border-2 border-accent-red flex items-center justify-center sos-pulse">
+              <span className="text-accent-red text-2xl font-bold">!</span>
             </div>
-            <h2 className="text-xl font-semibold text-red mt-4">SOS ACTIVATED</h2>
-            <p className="text-sm text-slate-400 mt-2">Notifying emergency contacts…</p>
+            <h2 className="text-xl font-semibold text-accent-red mt-4">SOS ACTIVATED</h2>
+            <p className="text-sm text-text-secondary mt-2">Notifying emergency contacts…</p>
             <ul className="mt-6 space-y-2 text-left">
               {EMERGENCY_CONTACTS.map((c, i) => (
                 <li
                   key={c.name}
                   className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm transition-all duration-500 ${
                     i < contactIndex
-                      ? 'border-green/30 bg-green/5 text-green'
-                      : 'border-border bg-card/50 text-dim'
+                      ? 'border-green/30 bg-green-12 text-accent-cyan'
+                      : 'border-border bg-background text-muted'
                   }`}
                 >
                   <span>
@@ -119,7 +119,7 @@ export default function SosModal({ open, onClose }) {
               ))}
             </ul>
             {phase === 'done' && (
-              <button type="button" onClick={handleClose} className="mt-6 px-6 py-2.5 rounded-lg bg-card border border-border text-sm text-slate-300 hover:bg-border/30 transition-colors">
+              <button type="button" onClick={handleClose} className="mt-6 px-6 py-2.5 rounded-lg bg-background border border-border text-sm text-text-secondary hover:bg-blue-12 transition-colors">
                 Close
               </button>
             )}

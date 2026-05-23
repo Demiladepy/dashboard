@@ -12,7 +12,7 @@ export default function StatsPanel({ stats }) {
       <h2 className="section-label mb-3">Brain metrics</h2>
       <div className="grid grid-cols-3 gap-2">
         {items.slice(0, 3).map((item) => (
-          <div key={item.label} className="bg-surface rounded-xl border border-border p-3 text-center stat-card">
+          <div key={item.label} className="bg-background rounded-xl border border-border p-3 text-center stat-card">
             <span className={`text-xl font-normal tabular-nums ${item.color}`}>{item.value}</span>
             <span className="text-[10px] text-muted uppercase block mt-1">{item.label}</span>
           </div>
@@ -20,7 +20,7 @@ export default function StatsPanel({ stats }) {
       </div>
       <div className="grid grid-cols-2 gap-2 mt-2">
         {items.slice(3).map((item) => (
-          <div key={item.label} className="bg-surface rounded-xl border border-border p-3 text-center stat-card">
+          <div key={item.label} className="bg-background rounded-xl border border-border p-3 text-center stat-card">
             <span className={`text-lg font-normal tabular-nums ${item.color}`}>{item.value}</span>
             <span className="text-[10px] text-muted uppercase block mt-1">{item.label}</span>
           </div>

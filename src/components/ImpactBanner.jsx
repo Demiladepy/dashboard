@@ -16,7 +16,7 @@ export default function ImpactBanner({ stats, brain }) {
               <span className="text-[11px] text-muted ml-2">{m.suffix}</span>
             </p>
           </div>
-          <span className="text-[10px] text-accent-cyan bg-accent-cyan/10 px-2 py-1 rounded-full border border-accent-cyan/20">
+          <span className="text-[10px] text-accent bg-blue-12 px-2 py-1 rounded-full border border-blue/15">
             brain
           </span>
         </div>

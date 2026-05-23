@@ -36,8 +36,8 @@ export default function LandingHero({ onEnter }) {
             <button type="button" onClick={onEnter} className="stripe-btn">
               Launch Command Center
             </button>
-            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-full border border-border bg-card/50 text-[11px] text-muted">
-              <span className="w-2 h-2 rounded-full bg-accent-cyan header-pulse" />
+            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-full border border-border bg-surface text-[11px] text-muted shadow-stripe-sm">
+              <span className="w-2 h-2 rounded-full bg-accent header-pulse" />
               Live demo · 6-room spatial model
             </div>
           </div>
@@ -47,7 +47,7 @@ export default function LandingHero({ onEnter }) {
           <div className="stripe-card">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] uppercase tracking-wider text-muted">Brain capabilities</span>
-              <span className="text-[10px] text-accent-cyan bg-accent-cyan/10 px-2 py-0.5 rounded-full border border-accent-cyan/20">ACTIVE</span>
+              <span className="text-[10px] text-accent bg-blue-12 px-2 py-0.5 rounded-full border border-blue/15">ACTIVE</span>
             </div>
             <div className="space-y-3">
               {[

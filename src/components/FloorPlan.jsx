@@ -27,7 +27,7 @@ export default function FloorPlan({ activeRoomId, currentStatus, pathTrail, plan
         </span>
       </div>
 
-      <div className="w-full bg-surface rounded-xl border border-border h-[220px] lg:h-[260px] relative overflow-hidden flex items-center justify-center">
+      <div className="w-full bg-background rounded-xl border border-border h-[220px] lg:h-[260px] relative overflow-hidden flex items-center justify-center">
         <div
           className="relative"
           style={{ width: CONTAINER_W, height: CONTAINER_H, transform: 'scale(0.82)', transformOrigin: 'center' }}
@@ -62,31 +62,31 @@ export default function FloorPlan({ activeRoomId, currentStatus, pathTrail, plan
 
           {trailPoints && (
             <svg className="absolute inset-0 pointer-events-none z-10" width={CONTAINER_W} height={CONTAINER_H} aria-hidden="true">
-              <polyline points={trailPoints} fill="none" stroke="#00d4ff" strokeWidth="2" strokeLinecap="round" className="path-flow" />
+              <polyline points={trailPoints} fill="none" stroke="#635bff" strokeWidth="2" strokeLinecap="round" className="path-flow" />
             </svg>
           )}
 
           <div
-            className="absolute w-[14px] h-[14px] rounded-full bg-accent-cyan avatar-move z-20"
+            className="absolute w-[14px] h-[14px] rounded-full bg-accent avatar-move z-20"
             style={{
               top: ROOM_LAYOUT[activeRoomId].dotY,
               left: ROOM_LAYOUT[activeRoomId].dotX,
               transform: 'translate(-50%, -50%)',
-              boxShadow: '0 0 12px rgba(0, 212, 255, 0.6)',
+              boxShadow: '0 0 10px rgba(99, 91, 255, 0.45)',
             }}
             aria-label={`User located in ${ROOM_LAYOUT[activeRoomId].label}`}
           >
-            <div className="absolute top-1/2 left-1/2 w-full h-full rounded-full border-[1.5px] border-accent-cyan avatar-ring-anim box-border pointer-events-none" />
-            <div className="absolute top-[-26px] left-1/2 -translate-x-1/2 bg-background/90 px-2 py-0.5 rounded-md whitespace-nowrap z-30 border border-accent-cyan/20">
-              <span className="text-[8px] text-accent-cyan">{currentStatus.dist}</span>
+            <div className="absolute top-1/2 left-1/2 w-full h-full rounded-full border-[1.5px] border-accent avatar-ring-anim box-border pointer-events-none" />
+            <div className="absolute top-[-26px] left-1/2 -translate-x-1/2 bg-white px-2 py-0.5 rounded-md whitespace-nowrap z-30 border border-border shadow-stripe-sm">
+              <span className="text-[8px] text-accent font-medium">{currentStatus.dist}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="flex gap-4 mt-2 text-[10px] text-muted">
-        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-accent inline-block rounded" /> Planned</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-accent-cyan inline-block rounded" /> Actual</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-accent inline-block rounded opacity-40" /> Planned</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-accent inline-block rounded" /> Actual</span>
       </div>
     </section>
   );
