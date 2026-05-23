@@ -24,6 +24,18 @@ export const ALERTS_CYCLE = [
   { type: 'safe', msg: 'Bedroom reached — daily route complete' },
 ];
 
+/** One event per route step — aligned with where Afolabi actually is (no random hazards) */
+export const ROUTE_EVENTS = [
+  { type: 'info', msg: 'Afolabi in living room — route started' },
+  { type: 'info', msg: 'Entering hallway toward kitchen' },
+  { type: 'safe', msg: 'Reached kitchen independently' },
+  { type: 'info', msg: 'Leaving kitchen — hallway clear' },
+  { type: 'info', msg: 'Arrived at bathroom' },
+  { type: 'info', msg: 'Hallway path open toward bedroom' },
+  { type: 'safe', msg: 'Bedroom reached — daily route complete' },
+  { type: 'info', msg: 'Returning to living room via hallway' },
+];
+
 export const ROOM_LAYOUT = {
   living: { top: 12, left: 12, width: 140, height: 100, label: 'Living room', dotX: 82, dotY: 62 },
   kitchen: { top: 12, left: 153, width: 120, height: 100, label: 'Kitchen', dotX: 213, dotY: 62 },

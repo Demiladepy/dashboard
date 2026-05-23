@@ -37,7 +37,9 @@ export default function SereneAlert({ alert, onDismiss, soundEnabled = true }) {
           <p className="serene-alert-reassurance">{alert.reassurance}</p>
 
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-            <span className="text-[10px] text-muted capitalize">{alert.riskLevel} risk · HoloAid brain</span>
+            <span className="text-[10px] text-muted">
+              {alert.trigger} · {alert.riskLevel} risk
+            </span>
             <button
               type="button"
               onClick={onDismiss}

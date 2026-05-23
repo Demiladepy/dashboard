@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ROUTE,
-  ALERTS_CYCLE,
+  ROUTE_EVENTS,
   ROOM_LAYOUT,
   ROOM_TO_COLOR,
   INITIAL_CHART,
@@ -12,7 +12,7 @@ import {
 import { CHAOS_PRESETS } from '../data/chaosPresets';
 import { processBrainTick, getInitialBrainState } from '../engine/guardianBrain';
 import { recordCaregiverAction } from '../engine/memoryEngine';
-import { buildSereneAlert } from '../utils/sereneMessages';
+import { buildSereneAlert, shouldNotifyCaregiver } from '../utils/sereneMessages';
 
 function getCurrentHourIndex() {
   const hour = new Date().getHours();
@@ -60,7 +60,7 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
   const activeRoomId = currentStatus.room;
 
   const applyEvent = useCallback(
-    (rawAlert, { advanceRoute = false, forceOriginalRoute = false, skipCaregiverPrompt = false, injected = false } = {}) => {
+    (rawAlert, { advanceRoute = false, forceOriginalRoute = false, skipCaregiverPrompt = false, injected = false, caregiverAction = false } = {}) => {
       const idx = routeIndexRef.current;
       const nextIdx = advanceRoute ? (idx + 1) % ROUTE.length : idx;
       const room = ROUTE[nextIdx].room;
@@ -128,14 +128,26 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
           reroutes: brainResult.route.rerouted ? s.reroutes + 1 : s.reroutes,
         }));
 
-        setSereneAlert(
-          buildSereneAlert({
+        if (
+          shouldNotifyCaregiver({
             alert,
-            room,
-            decision: brainResult.decision.label,
-            riskLevel: brainResult.riskLevel,
-          }),
-        );
+            brainResult,
+            injected,
+            caregiverAction,
+          })
+        ) {
+          setSereneAlert(
+            buildSereneAlert({
+              alert,
+              room,
+              decision: brainResult.decision.label,
+              riskLevel: brainResult.riskLevel,
+              brainResult,
+              injected,
+              caregiverAction,
+            }),
+          );
+        }
 
         if (brainResult.needsCaregiverApproval) {
           setPendingOverride({
@@ -156,8 +168,11 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
 
   const advance = useCallback(() => {
     const next = (routeIndexRef.current + 1) % ROUTE.length;
-    const cycleAlert = ALERTS_CYCLE[next % ALERTS_CYCLE.length];
-    applyEvent(cycleAlert, { advanceRoute: true });
+    const routeEvent = ROUTE_EVENTS[next] || {
+      type: 'info',
+      msg: `Location update: ${ROOM_LAYOUT[ROUTE[next].room].label}`,
+    };
+    applyEvent(routeEvent, { advanceRoute: true });
   }, [applyEvent]);
 
   const injectHazard = useCallback(
@@ -190,9 +205,11 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
         room: activeRoomId,
         decision: 'Reroute approved',
         riskLevel: brain.riskLevel,
+        brainResult: brain,
+        caregiverAction: true,
       }),
     );
-  }, [pendingOverride, activeRoomId, brain.riskLevel]);
+  }, [pendingOverride, activeRoomId, brain]);
 
   const rejectReroute = useCallback(() => {
     if (!pendingOverride) return;
@@ -222,9 +239,11 @@ export function useSimulation({ paused = false, intervalMs = 3000 } = {}) {
         room: activeRoomId,
         decision: 'Override applied',
         riskLevel: brain.riskLevel,
+        brainResult: brain,
+        caregiverAction: true,
       }),
     );
-  }, [pendingOverride, activeRoomId, brain.riskLevel]);
+  }, [pendingOverride, activeRoomId, brain]);
 
   useEffect(() => {
     if (paused) return undefined;
